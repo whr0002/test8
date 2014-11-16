@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, MainActivity!</string>
+    <string name="app_name">Daily Cartoons Link</string>
+    <string name="time">Time used：$ seconds</string>
+    <string name="quit">Quit</string>
+    <string name="sure_quit">Quit the game？</string>
+    <string name="alert_dialog_ok">Yes</string>
+    <string name="alert_dialog_cancel">No</string>
+    <string name="win">Congratulations</string>
+    <string name="lose">Game Over</string>
+    <string name="pause">Paused</string>
+    <string name="go">Click to continue</string>
+    <string name="retry">Click to retry</string>
+</resources>
