@@ -79,21 +79,21 @@ public class BoardView extends View {
 //		loadBitmaps(17, r.getDrawable(R.drawable.fruit_18));
 //		loadBitmaps(18, r.getDrawable(R.drawable.fruit_19));
 		
-		loadBitmaps(1, r.getDrawable(R.drawable.rounded_corners1));
-		loadBitmaps(2, r.getDrawable(R.drawable.rounded_corners2));
-		loadBitmaps(3, r.getDrawable(R.drawable.rounded_corners3));
-		loadBitmaps(4, r.getDrawable(R.drawable.rounded_corners4));
-		loadBitmaps(5, r.getDrawable(R.drawable.rounded_corners5));
-		loadBitmaps(6, r.getDrawable(R.drawable.rounded_corners6));
-		loadBitmaps(7, r.getDrawable(R.drawable.rounded_corners7));
-		loadBitmaps(8, r.getDrawable(R.drawable.rounded_corners8));
-		loadBitmaps(9, r.getDrawable(R.drawable.rounded_corners9));
-		loadBitmaps(10, r.getDrawable(R.drawable.rounded_corners10));
-		loadBitmaps(11, r.getDrawable(R.drawable.rounded_corners11));
-		loadBitmaps(12, r.getDrawable(R.drawable.rounded_corners12));
-		loadBitmaps(13, r.getDrawable(R.drawable.rounded_corners13));
-		loadBitmaps(14, r.getDrawable(R.drawable.rounded_corners14));
-		loadBitmaps(15, r.getDrawable(R.drawable.rounded_corners15));
+		loadBitmaps(1, r.getDrawable(R.drawable.shadow1));
+		loadBitmaps(2, r.getDrawable(R.drawable.shadow2));
+		loadBitmaps(3, r.getDrawable(R.drawable.shadow3));
+		loadBitmaps(4, r.getDrawable(R.drawable.shadow4));
+		loadBitmaps(5, r.getDrawable(R.drawable.shadow5));
+		loadBitmaps(6, r.getDrawable(R.drawable.shadow6));
+		loadBitmaps(7, r.getDrawable(R.drawable.shadow7));
+		loadBitmaps(8, r.getDrawable(R.drawable.shadow8));
+		loadBitmaps(9, r.getDrawable(R.drawable.shadow9));
+		loadBitmaps(10, r.getDrawable(R.drawable.shadow10));
+		loadBitmaps(11, r.getDrawable(R.drawable.shadow11));
+		loadBitmaps(12, r.getDrawable(R.drawable.shadow12));
+		loadBitmaps(13, r.getDrawable(R.drawable.shadow13));
+		loadBitmaps(14, r.getDrawable(R.drawable.shadow14));
+		loadBitmaps(15, r.getDrawable(R.drawable.shadow15));
 	}
 	
 	/**

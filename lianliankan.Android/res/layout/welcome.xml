@@ -8,16 +8,23 @@
     			android:layout_width="wrap_content"
     			android:layout_height="wrap_content"
     			android:layout_centerInParent="true"
-    			android:background="@drawable/buttons_bg1"
-    			android:src="@drawable/buttons_play"/>
-    <ImageView android:id="@+id/title_img"
-    		android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-    		android:layout_below="@id/play_btn"
-    		android:layout_centerHorizontal="true"
-    		android:src="@drawable/title"
-    		android:paddingTop="10dip"/>
+    			android:background="@drawable/play_bg"/>
     
+    <ImageButton android:id="@+id/help_btn"
+    			android:layout_width="wrap_content"
+    			android:layout_height="wrap_content"
+    			android:layout_centerHorizontal="true"
+    			android:layout_below="@+id/play_btn"
+    			android:layout_marginTop="20dp"
+    			android:background="@drawable/button_help_fixed"/>
+    
+    <ImageButton android:id="@+id/rate_btn"
+    			android:layout_width="wrap_content"
+    			android:layout_height="wrap_content"
+    			android:layout_centerHorizontal="true"
+    			android:layout_below="@+id/help_btn"
+    			android:layout_marginTop="20dp"
+    			android:background="@drawable/button_rate"/>
     <LinearLayout
         android:id="@+id/tool_layout"
         android:layout_width="match_parent"
@@ -214,4 +221,15 @@
             android:layout_below="@+id/game_state"/>
         
     </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/title_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tool_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="44dp"
+        android:paddingTop="10dip"
+        android:src="@drawable/title" />
+
 </RelativeLayout>

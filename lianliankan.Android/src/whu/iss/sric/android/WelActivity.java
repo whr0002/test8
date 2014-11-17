@@ -44,6 +44,7 @@ public class WelActivity extends Activity implements OnClickListener,
 	private TextView textRefreshNum;
 	private TextView textTipNum;
 	private TextView gameState;
+	private TextView continue_to;
 
 	private RelativeLayout timerLayout;
 	private RelativeLayout menuLayout;
@@ -108,6 +109,7 @@ public class WelActivity extends Activity implements OnClickListener,
 		textRefreshNum = (TextView) findViewById(R.id.text_refresh_num);
 		textTipNum = (TextView) findViewById(R.id.text_tip_num);
 		gameState = (TextView) findViewById(R.id.game_state);
+		continue_to = (TextView) findViewById(R.id.continue_to);
 
 		timerLayout = (RelativeLayout) findViewById(R.id.timer_layout);
 		menuLayout = (RelativeLayout) findViewById(R.id.menu_layout);
@@ -367,6 +369,8 @@ public class WelActivity extends Activity implements OnClickListener,
 					// stuff that updates ui
 					gameState.setText(WelActivity.this.getResources()
 							.getString(R.string.win));
+					continue_to.setText(WelActivity.this.getResources()
+							.getString(R.string.go));
 					stateLayout.setVisibility(View.VISIBLE);
 				}
 			});
@@ -381,6 +385,8 @@ public class WelActivity extends Activity implements OnClickListener,
 					// stuff that updates ui
 					gameState.setText(WelActivity.this.getResources()
 							.getString(R.string.lose));
+					continue_to.setText(WelActivity.this.getResources()
+							.getString(R.string.retry));
 					stateLayout.setVisibility(View.VISIBLE);
 				}
 			});
@@ -394,6 +400,8 @@ public class WelActivity extends Activity implements OnClickListener,
 				gameView.stopTimer();
 				gameState.setText(WelActivity.this.getResources()
 						.getString(R.string.pause));
+				continue_to.setText(WelActivity.this.getResources()
+						.getString(R.string.go));
 				stateLayout.setVisibility(View.VISIBLE);
 			}
 			break;
