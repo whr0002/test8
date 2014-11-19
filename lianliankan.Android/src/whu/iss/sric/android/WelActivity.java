@@ -30,6 +30,9 @@ public class WelActivity extends Activity implements OnClickListener,
 		OnTimerListener, OnStateListener, OnToolsChangeListener {
 
 	private ImageButton btnPlay;
+	private ImageButton btnHelp;
+	private ImageButton btnRate;
+	
 	private ImageButton btnRefresh;
 	private ImageButton btnTip;
 	private ImageButton btnMenu;
@@ -96,6 +99,8 @@ public class WelActivity extends Activity implements OnClickListener,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.welcome);
 		btnPlay = (ImageButton) findViewById(R.id.play_btn);
+		btnHelp = (ImageButton) findViewById(R.id.help_btn);
+		btnRate = (ImageButton) findViewById(R.id.rate_btn);
 		btnRefresh = (ImageButton) findViewById(R.id.refresh_btn);
 		btnTip = (ImageButton) findViewById(R.id.tip_btn);
 		btnMenu = (ImageButton) findViewById(R.id.menu_btn);
@@ -122,6 +127,9 @@ public class WelActivity extends Activity implements OnClickListener,
 		progress.setMax(gameView.getTotalTime());
 
 		btnPlay.setOnClickListener(this);
+		btnHelp.setOnClickListener(this);
+		btnRate.setOnClickListener(this);
+		
 		btnRefresh.setOnClickListener(this);
 		btnTip.setOnClickListener(this);
 		btnMenu.setOnClickListener(this);
@@ -147,8 +155,13 @@ public class WelActivity extends Activity implements OnClickListener,
 				.getStreamVolume(AudioManager.STREAM_MUSIC);
 
 		Animation scale = AnimationUtils.loadAnimation(this, R.anim.scale_anim);
+		Animation bounce_in = AnimationUtils.loadAnimation(this,
+				R.anim.bounce_in);
 		imgTitle.startAnimation(scale);
 		btnPlay.startAnimation(scale);
+		btnHelp.startAnimation(scale);
+		btnRate.startAnimation(scale);
+		btnSound.startAnimation(bounce_in);
 
 		SharedPreferences sp = this.getSharedPreferences("settings", 0);
 		spEditor = sp.edit();
@@ -173,6 +186,14 @@ public class WelActivity extends Activity implements OnClickListener,
 		case R.id.play_btn:
 			playClicked();
 			break;
+			
+		case R.id.help_btn:
+			// Show instruction
+			break;
+			
+		case R.id.rate_btn:
+
+			break;
 
 		case R.id.refresh_btn:
 			refreshClicked();
@@ -191,11 +212,11 @@ public class WelActivity extends Activity implements OnClickListener,
 			break;
 
 		case R.id.menu_btn:
-			toggleView();
+			showHomeView();
 			break;
 
 		case R.id.menu_layout:
-			toggleView();
+			showHomeView();
 			break;
 
 		case R.id.sound_btn:
@@ -243,9 +264,16 @@ public class WelActivity extends Activity implements OnClickListener,
 		Animation scaleOut = AnimationUtils.loadAnimation(this,
 				R.anim.scale_anim_out);
 		Animation transIn = AnimationUtils.loadAnimation(this, R.anim.trans_in);
-
+		Animation bounce_in = AnimationUtils.loadAnimation(this,
+				R.anim.bounce_in);
 		btnPlay.startAnimation(scaleOut);
+		btnHelp.startAnimation(scaleOut);
+		btnRate.startAnimation(scaleOut);
+		
 		btnPlay.setVisibility(View.GONE);
+		btnHelp.setVisibility(View.GONE);
+		btnRate.setVisibility(View.GONE);
+		
 		imgTitle.setVisibility(View.GONE);
 		gameView.setVisibility(View.VISIBLE);
 
@@ -262,14 +290,14 @@ public class WelActivity extends Activity implements OnClickListener,
 		refreshLayout.setVisibility(View.VISIBLE);
 		tipLayout.setVisibility(View.VISIBLE);
 
-		timerLayout.startAnimation(transIn);
-		menuLayout.startAnimation(transIn);
-		pauseLayout.startAnimation(transIn);
-		refreshLayout.startAnimation(transIn);
-		tipLayout.startAnimation(transIn);
+		timerLayout.startAnimation(bounce_in);
+		menuLayout.startAnimation(bounce_in);
+		pauseLayout.startAnimation(bounce_in);
+		refreshLayout.startAnimation(bounce_in);
+		tipLayout.startAnimation(bounce_in);
 
-		btnRefresh.startAnimation(transIn);
-		btnTip.startAnimation(transIn);
+		btnRefresh.startAnimation(bounce_in);
+		btnTip.startAnimation(bounce_in);
 		gameView.startAnimation(transIn);
 		player.pause();
 		gameView.startPlay();
@@ -279,7 +307,8 @@ public class WelActivity extends Activity implements OnClickListener,
 
 	public void refreshClicked() {
 		Animation shake01 = AnimationUtils.loadAnimation(this, R.anim.shake);
-		btnRefresh.startAnimation(shake01);
+		Animation rotate = AnimationUtils.loadAnimation(this, R.anim.rotate);
+		btnRefresh.startAnimation(rotate);
 		gameView.refreshChange();
 	}
 
@@ -290,30 +319,43 @@ public class WelActivity extends Activity implements OnClickListener,
 	}
 
 	// Change Views
-	public void toggleView() {
+	public void showHomeView() {
 		// Show Home View
 		Animation scale = AnimationUtils.loadAnimation(this, R.anim.scale_anim);
+		Animation slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up);
 		btnPlay.setVisibility(View.VISIBLE);
+		btnHelp.setVisibility(View.VISIBLE);
+		btnRate.setVisibility(View.VISIBLE);
+		
 		btnPlay.startAnimation(scale);
+		btnHelp.startAnimation(scale);
+		btnRate.startAnimation(scale);
 
 		imgTitle.setVisibility(View.VISIBLE);
 		imgTitle.startAnimation(scale);
 
+		timerLayout.startAnimation(slideUp);
+		menuLayout.startAnimation(slideUp);
+		pauseLayout.startAnimation(slideUp);
+		refreshLayout.startAnimation(slideUp);
+		tipLayout.startAnimation(slideUp);
+		
 		gameView.setVisibility(View.GONE);
-
 		btnRefresh.setVisibility(View.GONE);
 		btnTip.setVisibility(View.GONE);
 		progress.setVisibility(View.GONE);
 		clock.setVisibility(View.GONE);
 		textRefreshNum.setVisibility(View.GONE);
 		textTipNum.setVisibility(View.GONE);
-
+		
 		timerLayout.setVisibility(View.GONE);
 		menuLayout.setVisibility(View.GONE);
 		pauseLayout.setVisibility(View.GONE);
 		refreshLayout.setVisibility(View.GONE);
 		tipLayout.setVisibility(View.GONE);
+		
 
+		
 		gameView.pausePlayer();
 		gameView.stopTimer();
 

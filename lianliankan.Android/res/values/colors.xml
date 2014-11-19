@@ -21,4 +21,6 @@
     <color name="grey_grey">#dcd9d2</color>
     <color name="dark_brown">#cc6906</color>
     <color name="brown">#ff9c00</color>
+    
+    <color name="trans">#85222222</color>
 </resources>
