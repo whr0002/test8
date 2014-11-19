@@ -20,11 +20,13 @@ public class GameView extends BoardView {
 
 	private static final int REFRESH_VIEW = 1;
 
+	public static final int HOME = 0;
 	public static final int WIN = 1;
 	public static final int LOSE = 2;
 	public static final int PAUSE = 3;
 	public static final int PLAY = 4;
 	public static final int QUIT = 5;
+
 
 	private int Help = 30;
 	private int Refresh = 3;

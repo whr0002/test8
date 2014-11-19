@@ -136,8 +136,8 @@ public class BoardView extends View {
 		Path pathShapeInner = new Path();
 		// float[] intervals = new float[] { 20.0f, 20.0f };
 		// float radius = 50.0f;
-		float phase = iconSizeF / 8;
-		float advance = iconSizeF / 4;
+		float phase = 0;
+		float advance = iconSizeF / 8;
 		float radiusOut = iconSizeF / 8;
 		float radiusIn = iconSizeF / 12;
 		

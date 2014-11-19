@@ -3,11 +3,14 @@ package com.rs.link;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,9 +21,11 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.rs.link.R;
 import com.rs.link.views.GameView;
@@ -34,7 +39,7 @@ public class WelActivity extends Activity implements OnClickListener,
 	private ImageButton btnPlay;
 	private ImageButton btnHelp;
 	private ImageButton btnRate;
-	
+
 	private ImageButton btnRefresh;
 	private ImageButton btnTip;
 	private ImageButton btnMenu;
@@ -43,13 +48,15 @@ public class WelActivity extends Activity implements OnClickListener,
 
 	private ImageView imgTitle;
 	private GameView gameView;
-	private SeekBar progress;
+	private ProgressBar progress;
 	private MyDialog dialog;
 	private ImageView clock;
 	private TextView textRefreshNum;
 	private TextView textTipNum;
 	private TextView gameState;
 	private TextView continue_to;
+	private TextView explaination;
+	private ImageView example;
 
 	private RelativeLayout timerLayout;
 	private RelativeLayout menuLayout;
@@ -69,6 +76,12 @@ public class WelActivity extends Activity implements OnClickListener,
 	private int musicVolumn;
 
 	private int currentState;
+
+	private Animation scaleOut;
+	private Animation transIn;
+	private Animation scale;
+	private Animation bounce_in;
+	private Animation slideUp;
 
 	private Handler handler = new Handler() {
 		@Override
@@ -112,11 +125,13 @@ public class WelActivity extends Activity implements OnClickListener,
 		imgTitle = (ImageView) findViewById(R.id.title_img);
 		gameView = (GameView) findViewById(R.id.game_view);
 		clock = (ImageView) findViewById(R.id.clock);
-		progress = (SeekBar) findViewById(R.id.timer);
+		progress = (ProgressBar) findViewById(R.id.timer);
 		textRefreshNum = (TextView) findViewById(R.id.text_refresh_num);
 		textTipNum = (TextView) findViewById(R.id.text_tip_num);
 		gameState = (TextView) findViewById(R.id.game_state);
 		continue_to = (TextView) findViewById(R.id.continue_to);
+		explaination = (TextView) findViewById(R.id.explaination);
+		example = (ImageView) findViewById(R.id.example);
 
 		timerLayout = (RelativeLayout) findViewById(R.id.timer_layout);
 		menuLayout = (RelativeLayout) findViewById(R.id.menu_layout);
@@ -131,7 +146,7 @@ public class WelActivity extends Activity implements OnClickListener,
 		btnPlay.setOnClickListener(this);
 		btnHelp.setOnClickListener(this);
 		btnRate.setOnClickListener(this);
-		
+
 		btnRefresh.setOnClickListener(this);
 		btnTip.setOnClickListener(this);
 		btnMenu.setOnClickListener(this);
@@ -153,12 +168,15 @@ public class WelActivity extends Activity implements OnClickListener,
 		// 获得声音设备和设备音量
 		soundManager = (AudioManager) this
 				.getSystemService(Context.AUDIO_SERVICE);
-		musicVolumn = soundManager
-				.getStreamVolume(AudioManager.STREAM_MUSIC);
+		musicVolumn = soundManager.getStreamVolume(AudioManager.STREAM_MUSIC);
 
-		Animation scale = AnimationUtils.loadAnimation(this, R.anim.scale_anim);
-		Animation bounce_in = AnimationUtils.loadAnimation(this,
-				R.anim.bounce_in);
+		// Animation Effects
+		scaleOut = AnimationUtils.loadAnimation(this, R.anim.scale_anim_out);
+		transIn = AnimationUtils.loadAnimation(this, R.anim.trans_in);
+		scale = AnimationUtils.loadAnimation(this, R.anim.scale_anim);
+		bounce_in = AnimationUtils.loadAnimation(this, R.anim.bounce_in);
+		slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up);
+
 		imgTitle.startAnimation(scale);
 		btnPlay.startAnimation(scale);
 		btnHelp.startAnimation(scale);
@@ -188,13 +206,14 @@ public class WelActivity extends Activity implements OnClickListener,
 		case R.id.play_btn:
 			playClicked();
 			break;
-			
+
 		case R.id.help_btn:
 			// Show instruction
+			showExample();
 			break;
-			
-		case R.id.rate_btn:
 
+		case R.id.rate_btn:
+			openRateIntent();
 			break;
 
 		case R.id.refresh_btn:
@@ -246,16 +265,98 @@ public class WelActivity extends Activity implements OnClickListener,
 
 	}
 
+	private void showExample() {
+
+		gameState.setText(WelActivity.this.getResources().getString(
+				R.string.instruction));
+		continue_to.setText(WelActivity.this.getResources().getString(
+				R.string.back));
+
+		toggleHomeBtns();
+		stateLayout.setVisibility(View.VISIBLE);
+		example.setVisibility(View.VISIBLE);
+		explaination.setVisibility(View.VISIBLE);
+		stateLayout.startAnimation(bounce_in);
+		soundLayout.startAnimation(slideUp);
+		soundLayout.setVisibility(View.GONE);
+		currentState = GameView.HOME;
+
+	}
+
+	private void openRateIntent() {
+		String packageName = "com.rs.link";
+		Intent rateIntent = new Intent(Intent.ACTION_VIEW);
+		// Try Google play
+		rateIntent.setData(Uri.parse("market://details?id=" + packageName));
+		if (tryStartActivity(rateIntent) == false) {
+			// Market (Google play) app seems not installed, let's try to open a
+			// webbrowser
+			rateIntent.setData(Uri
+					.parse("https://play.google.com/store/apps/details?id="
+							+ packageName));
+			if (tryStartActivity(rateIntent) == false) {
+				// Well if this also fails, we have run out of options,inform
+				// the user.
+				Toast.makeText(
+						this,
+						"Could not open Google Play, please install Google Play.",
+						Toast.LENGTH_SHORT).show();
+			}
+		}
+
+	}
+
+	private boolean tryStartActivity(Intent aIntent) {
+		try {
+			startActivity(aIntent);
+			return true;
+		} catch (ActivityNotFoundException e) {
+			return false;
+		}
+	}
+
 	public void doStateLayout() {
 		stateLayout.setVisibility(View.GONE);
 		if (currentState == GameView.WIN) {
-			gameView.startNextPlay();	
+			gameView.startNextPlay();
 		} else if (currentState == GameView.LOSE) {
 			gameView.startPlay();
 		} else if (currentState == GameView.PAUSE) {
 			resumeGame();
+		} else if (currentState == GameView.HOME) {
+			stateLayout.startAnimation(slideUp);
+			stateLayout.setVisibility(View.GONE);
+			example.setVisibility(View.GONE);
+			explaination.setVisibility(View.GONE);
+			toggleHomeBtns();
 		}
 
+	}
+
+	private void toggleHomeBtns() {
+		if (btnPlay.getVisibility() == View.VISIBLE) {
+			btnPlay.startAnimation(scaleOut);
+			btnHelp.startAnimation(scaleOut);
+			btnRate.startAnimation(scaleOut);
+			imgTitle.startAnimation(scaleOut);
+			
+			btnPlay.setVisibility(View.GONE);
+			btnHelp.setVisibility(View.GONE);
+			btnRate.setVisibility(View.GONE);
+			imgTitle.setVisibility(View.GONE);
+		} else {
+			btnPlay.setVisibility(View.VISIBLE);
+			btnHelp.setVisibility(View.VISIBLE);
+			btnRate.setVisibility(View.VISIBLE);
+			soundLayout.setVisibility(View.VISIBLE);
+			imgTitle.setVisibility(View.VISIBLE);
+
+			btnPlay.startAnimation(scale);
+			btnHelp.startAnimation(scale);
+			btnRate.startAnimation(scale);
+			soundLayout.startAnimation(bounce_in);
+			imgTitle.startAnimation(scale);
+		}
 	}
 
 	public void pauseClicked() {
@@ -263,19 +364,9 @@ public class WelActivity extends Activity implements OnClickListener,
 	}
 
 	public void playClicked() {
-		Animation scaleOut = AnimationUtils.loadAnimation(this,
-				R.anim.scale_anim_out);
-		Animation transIn = AnimationUtils.loadAnimation(this, R.anim.trans_in);
-		Animation bounce_in = AnimationUtils.loadAnimation(this,
-				R.anim.bounce_in);
-		btnPlay.startAnimation(scaleOut);
-		btnHelp.startAnimation(scaleOut);
-		btnRate.startAnimation(scaleOut);
-		
-		btnPlay.setVisibility(View.GONE);
-		btnHelp.setVisibility(View.GONE);
-		btnRate.setVisibility(View.GONE);
-		
+
+		toggleHomeBtns();
+
 		imgTitle.setVisibility(View.GONE);
 		gameView.setVisibility(View.VISIBLE);
 
@@ -323,15 +414,8 @@ public class WelActivity extends Activity implements OnClickListener,
 	// Change Views
 	public void showHomeView() {
 		// Show Home View
-		Animation scale = AnimationUtils.loadAnimation(this, R.anim.scale_anim);
-		Animation slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up);
-		btnPlay.setVisibility(View.VISIBLE);
-		btnHelp.setVisibility(View.VISIBLE);
-		btnRate.setVisibility(View.VISIBLE);
-		
-		btnPlay.startAnimation(scale);
-		btnHelp.startAnimation(scale);
-		btnRate.startAnimation(scale);
+
+		toggleHomeBtns();
 
 		imgTitle.setVisibility(View.VISIBLE);
 		imgTitle.startAnimation(scale);
@@ -341,7 +425,7 @@ public class WelActivity extends Activity implements OnClickListener,
 		pauseLayout.startAnimation(slideUp);
 		refreshLayout.startAnimation(slideUp);
 		tipLayout.startAnimation(slideUp);
-		
+
 		gameView.setVisibility(View.GONE);
 		btnRefresh.setVisibility(View.GONE);
 		btnTip.setVisibility(View.GONE);
@@ -349,15 +433,13 @@ public class WelActivity extends Activity implements OnClickListener,
 		clock.setVisibility(View.GONE);
 		textRefreshNum.setVisibility(View.GONE);
 		textTipNum.setVisibility(View.GONE);
-		
+
 		timerLayout.setVisibility(View.GONE);
 		menuLayout.setVisibility(View.GONE);
 		pauseLayout.setVisibility(View.GONE);
 		refreshLayout.setVisibility(View.GONE);
 		tipLayout.setVisibility(View.GONE);
-		
 
-		
 		gameView.pausePlayer();
 		gameView.stopTimer();
 
@@ -442,10 +524,10 @@ public class WelActivity extends Activity implements OnClickListener,
 			} else if (currentView == 1) {
 				gameView.player.pause();
 				gameView.stopTimer();
-				gameState.setText(WelActivity.this.getResources()
-						.getString(R.string.pause));
-				continue_to.setText(WelActivity.this.getResources()
-						.getString(R.string.go));
+				gameState.setText(WelActivity.this.getResources().getString(
+						R.string.pause));
+				continue_to.setText(WelActivity.this.getResources().getString(
+						R.string.go));
 				stateLayout.setVisibility(View.VISIBLE);
 			}
 			break;
@@ -467,19 +549,18 @@ public class WelActivity extends Activity implements OnClickListener,
 	@Override
 	protected void onResume() {
 		super.onResume();
-//		if (currentView == 0) {
-//			player.start();
-//		}
+		// if (currentView == 0) {
+		// player.start();
+		// }
 
 	}
 
 	@Override
 	protected void onDestroy() {
-		soundManager.setStreamVolume(AudioManager.STREAM_MUSIC,
-				musicVolumn, 0);
+		soundManager.setStreamVolume(AudioManager.STREAM_MUSIC, musicVolumn, 0);
 		gameView.setMode(GameView.QUIT);
 		super.onDestroy();
-		
+
 	}
 
 	public void resumeGame() {
