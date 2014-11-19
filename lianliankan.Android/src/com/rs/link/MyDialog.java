@@ -1,6 +1,5 @@
-package whu.iss.sric.android;
+package com.rs.link;
 
-import whu.iss.sric.view.GameView;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -9,6 +8,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
+import com.rs.link.R;
+import com.rs.link.views.GameView;
 
 public class MyDialog extends Dialog implements OnClickListener{
 

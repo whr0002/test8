@@ -1,11 +1,12 @@
-package whu.iss.sric.view;
+package com.rs.link.views;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import whu.iss.sric.android.R;
-import whu.iss.sric.android.SoundPlay;
+import com.rs.link.R;
+import com.rs.link.SoundPlay;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Point;

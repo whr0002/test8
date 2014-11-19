@@ -1,9 +1,10 @@
-package whu.iss.sric.view;
+package com.rs.link.views;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import whu.iss.sric.android.R;
+import com.rs.link.R;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;

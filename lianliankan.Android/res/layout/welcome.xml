@@ -185,7 +185,7 @@
 	    
     </LinearLayout>
    	
-    <whu.iss.sric.view.GameView
+    <com.rs.link.views.GameView
     	android:layout_width="wrap_content" 
     	android:layout_height="wrap_content" 
     	android:id="@+id/game_view"

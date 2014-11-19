@@ -1,4 +1,4 @@
-package whu.iss.sric.view;
+package com.rs.link.views;
 
 
 public interface OnTimerListener{

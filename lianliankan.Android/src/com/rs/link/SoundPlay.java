@@ -1,4 +1,4 @@
-package whu.iss.sric.android;
+package com.rs.link;
 
 import java.util.HashMap;
 

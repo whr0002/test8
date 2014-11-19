@@ -1,9 +1,5 @@
-package whu.iss.sric.android;
+package com.rs.link;
 
-import whu.iss.sric.view.GameView;
-import whu.iss.sric.view.OnStateListener;
-import whu.iss.sric.view.OnTimerListener;
-import whu.iss.sric.view.OnToolsChangeListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -25,6 +21,12 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import com.rs.link.R;
+import com.rs.link.views.GameView;
+import com.rs.link.views.OnStateListener;
+import com.rs.link.views.OnTimerListener;
+import com.rs.link.views.OnToolsChangeListener;
 
 public class WelActivity extends Activity implements OnClickListener,
 		OnTimerListener, OnStateListener, OnToolsChangeListener {
