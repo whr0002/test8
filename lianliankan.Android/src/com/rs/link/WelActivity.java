@@ -12,8 +12,6 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,11 +21,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.rs.link.R;
+import com.chartboost.sdk.CBLocation;
+import com.chartboost.sdk.Chartboost;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.analytics.GoogleAnalytics;
 import com.rs.link.views.GameView;
 import com.rs.link.views.OnStateListener;
 import com.rs.link.views.OnTimerListener;
@@ -83,36 +84,58 @@ public class WelActivity extends Activity implements OnClickListener,
 	private Animation bounce_in;
 	private Animation slideUp;
 
-	private Handler handler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case 0:
-				dialog = new MyDialog(WelActivity.this, gameView,
-						"Congratulations£¡", gameView.getTotalTime()
-								- progress.getProgress());
-				dialog.show();
-				break;
-			case 1:
-				dialog = new MyDialog(WelActivity.this, gameView, "Game Over£¡",
-						gameView.getTotalTime() - progress.getProgress());
-				dialog.show();
-				break;
+	private AdView adView;
 
-			case 2:
-				dialog = new MyDialog(WelActivity.this, gameView, "Paused£¡",
-						gameView.getTotalTime() - progress.getProgress());
-				dialog.show();
-				break;
-			}
-		}
-	};
+	// private Handler handler = new Handler() {
+	// @Override
+	// public void handleMessage(Message msg) {
+	// switch (msg.what) {
+	// case 0:
+	// dialog = new MyDialog(WelActivity.this, gameView,
+	// "Congratulations£¡", gameView.getTotalTime()
+	// - progress.getProgress());
+	// dialog.show();
+	// break;
+	// case 1:
+	// dialog = new MyDialog(WelActivity.this, gameView, "Game Over£¡",
+	// gameView.getTotalTime() - progress.getProgress());
+	// dialog.show();
+	// break;
+	//
+	// case 2:
+	// dialog = new MyDialog(WelActivity.this, gameView, "Paused£¡",
+	// gameView.getTotalTime() - progress.getProgress());
+	// dialog.show();
+	// break;
+	// }
+	// }
+	// };
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// Set up tracker
+		((MyApplication) getApplication())
+				.getTracker(MyApplication.TrackerName.APP_TRACKER);
+
 		setContentView(R.layout.welcome);
+		// Show ad
+		adView = (AdView) findViewById(R.id.ad);
+		if (adView != null) {
+			AdRequest adRequest = new AdRequest.Builder()
+					.addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+					.addTestDevice("5E4CA696BEB736E734DD974DD296F11A").build();
+			adView.loadAd(adRequest);
+		}
+
+		// Charboost Ad set up
+		Chartboost.startWithAppId(this, getResources()
+				.getString(R.string.appId),
+				getResources().getString(R.string.appSignature));
+		Chartboost.onCreate(this);
+
 		btnPlay = (ImageButton) findViewById(R.id.play_btn);
 		btnHelp = (ImageButton) findViewById(R.id.help_btn);
 		btnRate = (ImageButton) findViewById(R.id.rate_btn);
@@ -339,7 +362,7 @@ public class WelActivity extends Activity implements OnClickListener,
 			btnHelp.startAnimation(scaleOut);
 			btnRate.startAnimation(scaleOut);
 			imgTitle.startAnimation(scaleOut);
-			
+
 			btnPlay.setVisibility(View.GONE);
 			btnHelp.setVisibility(View.GONE);
 			btnRate.setVisibility(View.GONE);
@@ -361,6 +384,8 @@ public class WelActivity extends Activity implements OnClickListener,
 
 	public void pauseClicked() {
 		gameView.setMode(GameView.PAUSE);
+		if (Chartboost.hasInterstitial(CBLocation.LOCATION_LEADERBOARD)){}
+		Chartboost.showInterstitial(CBLocation.LOCATION_LEADERBOARD);
 	}
 
 	public void playClicked() {
@@ -469,7 +494,7 @@ public class WelActivity extends Activity implements OnClickListener,
 				player.start();
 			else if (currentView == 1)
 				gameView.startPlayer();
-			if(musicVolumn == 0){
+			if (musicVolumn == 0) {
 				musicVolumn = 3;
 			}
 			soundManager.setStreamVolume(AudioManager.STREAM_MUSIC,
@@ -532,7 +557,7 @@ public class WelActivity extends Activity implements OnClickListener,
 				continue_to.setText(WelActivity.this.getResources().getString(
 						R.string.go));
 				stateLayout.setVisibility(View.VISIBLE);
-				stateLayout.startAnimation(bounce_in);
+				// stateLayout.startAnimation(bounce_in);
 			}
 			break;
 		case GameView.QUIT:
@@ -542,29 +567,6 @@ public class WelActivity extends Activity implements OnClickListener,
 			break;
 		}
 		currentState = StateMode;
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-		gameView.setMode(GameView.PAUSE);
-	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-		// if (currentView == 0) {
-		// player.start();
-		// }
-
-	}
-
-	@Override
-	protected void onDestroy() {
-		soundManager.setStreamVolume(AudioManager.STREAM_MUSIC, musicVolumn, 0);
-		gameView.setMode(GameView.QUIT);
-		super.onDestroy();
-
 	}
 
 	public void resumeGame() {
@@ -592,8 +594,19 @@ public class WelActivity extends Activity implements OnClickListener,
 		this.finish();
 	}
 
+	private int numOfBackPressed = 0;
 	@Override
 	public void onBackPressed() {
+//		if (Chartboost.onBackPressed())
+//	        return;
+		if(stateLayout.getVisibility()==View.GONE&&numOfBackPressed == 0) {
+			// show ad
+			if (Chartboost.hasInterstitial(CBLocation.LOCATION_LEADERBOARD)){}
+			Chartboost.showInterstitial(CBLocation.LOCATION_LEADERBOARD);
+			numOfBackPressed++;
+			return;
+		}
+		
 		Dialog dialog = new AlertDialog.Builder(this)
 				.setIcon(R.drawable.buttons_bg20)
 				.setTitle(R.string.quit)
@@ -613,4 +626,66 @@ public class WelActivity extends Activity implements OnClickListener,
 						}).create();
 		dialog.show();
 	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		// Get an Analytics tracker to report app starts & uncaught exceptions
+		// etc.
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+
+		Chartboost.onStart(this);
+		Chartboost.cacheInterstitial(CBLocation.LOCATION_LEADERBOARD);
+
+	}
+
+	@Override
+	public void onStop() {
+		super.onStart();
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
+	}
+
+	@Override
+	protected void onPause() {
+		if (adView != null) {
+			adView.pause();
+		}
+		gameView.setMode(GameView.PAUSE);
+		super.onPause();
+		
+		Chartboost.onPause(this);
+
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		if (adView != null) {
+			adView.resume();
+		}
+		if (currentView == 0) {
+			player.start();
+		}
+
+		Chartboost.onResume(this);
+
+	}
+
+	
+	@Override
+	protected void onDestroy() {
+		// Destroy ads when the view is destroyed
+		if (adView != null) {
+			adView.destroy();
+		}
+		
+		Chartboost.onDestroy(this);
+
+		soundManager.setStreamVolume(AudioManager.STREAM_MUSIC, musicVolumn, 0);
+		gameView.setMode(GameView.QUIT);
+		super.onDestroy();
+
+	}
+
 }

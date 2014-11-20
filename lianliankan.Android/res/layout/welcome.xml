@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:background="@drawable/mainbg611"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+	android:background="@drawable/mainbg"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
@@ -222,7 +223,7 @@
             android:textSize="15sp" 
             android:layout_centerHorizontal="true"
 			android:layout_alignParentBottom="true"
-			android:layout_marginBottom="50dp"
+			android:layout_marginBottom="150dp"
 			android:textColor="@color/white"/>
         
         
@@ -261,8 +262,17 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/tool_layout"
         android:layout_centerHorizontal="true"
+        android:scaleType="centerCrop"
         android:layout_marginTop="44dp"
         android:paddingTop="10dip"
-        android:src="@drawable/title" />
+        android:src="@drawable/title_fixed1" />
+    
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/ad"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/bannerID"/>
 
 </RelativeLayout>
