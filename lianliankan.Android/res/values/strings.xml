@@ -14,5 +14,5 @@
     <string name="retry">Click to retry</string>
     <string name="instruction">Instruction</string>
     <string name="back">Click to go back</string>
-    <string name="explaination">Linking the same cartoon characters with less than 3 lines</string>
+    <string name="explaination">Link the same cartoon characters with less than 4 lines</string>
 </resources>

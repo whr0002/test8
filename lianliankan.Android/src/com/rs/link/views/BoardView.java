@@ -19,6 +19,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 
 public class BoardView extends View {
@@ -182,7 +183,7 @@ public class BoardView extends View {
 		if (path != null && path.length >= 2) {
 
 			mPath = new Path();
-
+			Log.d("debug", "Coor: "+path[0].x +","+ path[0].y);
 			Point mP = indextoScreen(path[0].x, path[0].y);
 			mPath.moveTo(mP.x + iconSize / 2, mP.y + iconSize / 2);
 

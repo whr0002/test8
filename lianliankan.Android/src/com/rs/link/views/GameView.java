@@ -362,6 +362,9 @@ public class GameView extends BoardView {
 		return false;
 	}
 
+	/**
+	 * Check if two points can connect directly
+	 * */
 	private boolean linkD(Point p1, Point p2) {
 		if (p1.x == p2.x) {
 			int y1 = Math.min(p1.y, p2.y);
@@ -394,6 +397,9 @@ public class GameView extends BoardView {
 		return false;
 	}
 
+	/**
+	 * Search for empty spots for X direction of a point
+	 * */
 	private void expandX(Point p, List<Point> l) {
 		l.clear();
 		for (int x = p.x + 1; x < xCount; x++) {
@@ -410,6 +416,9 @@ public class GameView extends BoardView {
 		}
 	}
 
+	/**
+	 * Search for empty spots for Y direction of a point
+	 * */
 	private void expandY(Point p, List<Point> l) {
 		l.clear();
 		for (int y = p.y + 1; y < yCount; y++) {
@@ -426,6 +435,10 @@ public class GameView extends BoardView {
 		}
 	}
 
+	
+	/**
+	 * Everything is cleared, Win!
+	 * */
 	private boolean win() {
 		for (int x = 0; x < xCount; x++) {
 			for (int y = 0; y < yCount; y++) {
@@ -437,6 +450,9 @@ public class GameView extends BoardView {
 		return true;
 	}
 
+	/**
+	 * Help the user clear same images
+	 * */
 	public void autoClear() {
 		if (Help == 0) {
 			soundPlay.play(ID_SOUND_ERROR, 0);
@@ -445,10 +461,13 @@ public class GameView extends BoardView {
 			Help--;
 			toolsChangedListener.onTipChanged(Help);
 			drawLine(path.toArray(new Point[] {}));
-			refreshHandler.sleep(500);
+			refreshHandler.sleep(0);
 		}
 	}
 
+	/**
+	 * Shuffle images
+	 * */
 	public void refreshChange() {
 		if (Refresh == 0) {
 			soundPlay.play(ID_SOUND_ERROR, 0);

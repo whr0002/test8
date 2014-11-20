@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:background="@drawable/mainbg61"
+	android:background="@drawable/mainbg611"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
@@ -8,7 +8,7 @@
     			android:layout_width="wrap_content"
     			android:layout_height="wrap_content"
     			android:layout_centerInParent="true"
-    			android:background="@drawable/play_bg"/>
+    			android:background="@drawable/play_bg1"/>
     
     <ImageButton android:id="@+id/help_btn"
     			android:layout_width="wrap_content"
@@ -246,7 +246,8 @@
 	        <TextView
 	            android:id="@+id/explaination"
 	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"     
+	            android:layout_height="wrap_content"   
+	            android:gravity="center"  
 	            android:text="@string/explaination"
 	            android:textColor="@color/white"
 	            android:textSize="20sp"

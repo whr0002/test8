@@ -469,6 +469,9 @@ public class WelActivity extends Activity implements OnClickListener,
 				player.start();
 			else if (currentView == 1)
 				gameView.startPlayer();
+			if(musicVolumn == 0){
+				musicVolumn = 3;
+			}
 			soundManager.setStreamVolume(AudioManager.STREAM_MUSIC,
 					musicVolumn, 0);
 			btnSound.setBackgroundResource(R.drawable.sound_fixed47);
@@ -529,6 +532,7 @@ public class WelActivity extends Activity implements OnClickListener,
 				continue_to.setText(WelActivity.this.getResources().getString(
 						R.string.go));
 				stateLayout.setVisibility(View.VISIBLE);
+				stateLayout.startAnimation(bounce_in);
 			}
 			break;
 		case GameView.QUIT:
@@ -564,6 +568,7 @@ public class WelActivity extends Activity implements OnClickListener,
 	}
 
 	public void resumeGame() {
+		stateLayout.startAnimation(slideUp);
 		stateLayout.setVisibility(View.GONE);
 		if (currentView == 0) {
 			player.start();
