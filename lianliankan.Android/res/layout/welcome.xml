@@ -209,11 +209,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/pause"
-            android:textSize="50sp" 
+            android:textSize="40sp" 
             android:layout_marginTop="100dp"
             android:layout_centerHorizontal="true"
             android:layout_alignParentTop="true"
             android:textColor="@color/white"/>
+        
+        <TextView
+            android:id="@+id/time_used"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/time"
+            android:textSize="20sp" 
+            android:layout_below="@+id/game_state"
+            android:layout_marginTop="10dp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/white"
+            android:visibility="gone"/>
         
         <TextView
             android:id="@+id/continue_to"
@@ -223,7 +235,7 @@
             android:textSize="15sp" 
             android:layout_centerHorizontal="true"
 			android:layout_alignParentBottom="true"
-			android:layout_marginBottom="150dp"
+			android:layout_marginBottom="100dp"
 			android:textColor="@color/white"/>
         
         

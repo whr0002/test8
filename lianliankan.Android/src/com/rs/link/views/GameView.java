@@ -28,13 +28,14 @@ public class GameView extends BoardView {
 	public static final int QUIT = 5;
 
 
-	private int Help = 30;
+	private int Help = 35;
 	private int Refresh = 3;
 	/**
 	 * 第一关为100秒钟的时间
 	 */
-	private int totalTime = 300;
+	private int totalTime = 30;
 	private int leftTime;
+
 
 	public static SoundPlay soundPlay;
 	public MediaPlayer player;
@@ -78,6 +79,7 @@ public class GameView extends BoardView {
 		toolsChangedListener.onTipChanged(Help);
 
 		leftTime = totalTime;
+
 		initMap();
 
 		if (hasSound)
@@ -479,4 +481,5 @@ public class GameView extends BoardView {
 			change();
 		}
 	}
+	
 }

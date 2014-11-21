@@ -57,6 +57,7 @@ public class WelActivity extends Activity implements OnClickListener,
 	private TextView gameState;
 	private TextView continue_to;
 	private TextView explaination;
+	private TextView timeUsed;
 	private ImageView example;
 
 	private RelativeLayout timerLayout;
@@ -154,6 +155,7 @@ public class WelActivity extends Activity implements OnClickListener,
 		gameState = (TextView) findViewById(R.id.game_state);
 		continue_to = (TextView) findViewById(R.id.continue_to);
 		explaination = (TextView) findViewById(R.id.explaination);
+		timeUsed = (TextView) findViewById(R.id.time_used);
 		example = (ImageView) findViewById(R.id.example);
 
 		timerLayout = (RelativeLayout) findViewById(R.id.timer_layout);
@@ -341,6 +343,7 @@ public class WelActivity extends Activity implements OnClickListener,
 	public void doStateLayout() {
 		stateLayout.setVisibility(View.GONE);
 		if (currentState == GameView.WIN) {
+			progress.setMax(gameView.getTotalTime()-10);
 			gameView.startNextPlay();
 		} else if (currentState == GameView.LOSE) {
 			gameView.startPlay();
@@ -367,12 +370,14 @@ public class WelActivity extends Activity implements OnClickListener,
 			btnHelp.setVisibility(View.GONE);
 			btnRate.setVisibility(View.GONE);
 			imgTitle.setVisibility(View.GONE);
+
 		} else {
 			btnPlay.setVisibility(View.VISIBLE);
 			btnHelp.setVisibility(View.VISIBLE);
 			btnRate.setVisibility(View.VISIBLE);
 			soundLayout.setVisibility(View.VISIBLE);
 			imgTitle.setVisibility(View.VISIBLE);
+
 
 			btnPlay.startAnimation(scale);
 			btnHelp.startAnimation(scale);
@@ -384,8 +389,8 @@ public class WelActivity extends Activity implements OnClickListener,
 
 	public void pauseClicked() {
 		gameView.setMode(GameView.PAUSE);
-		if (Chartboost.hasInterstitial(CBLocation.LOCATION_LEADERBOARD)){}
-		Chartboost.showInterstitial(CBLocation.LOCATION_LEADERBOARD);
+//		if (Chartboost.hasInterstitial(CBLocation.LOCATION_LEADERBOARD)){}
+//		Chartboost.showInterstitial(CBLocation.LOCATION_LEADERBOARD);
 	}
 
 	public void playClicked() {
@@ -513,6 +518,14 @@ public class WelActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void OnStateChanged(int StateMode) {
+		// Show ad here
+		if (Chartboost.hasInterstitial(CBLocation.LOCATION_LEADERBOARD)){}
+		Chartboost.showInterstitial(CBLocation.LOCATION_LEADERBOARD);
+		
+		timeUsed.setVisibility(View.GONE);
+		
+		// Show time spent in the game
+		timeUsed.setText(timeUsed.getText().toString().replace("$", String.valueOf(gameView.getTotalTime()-progress.getProgress())));
 		switch (StateMode) {
 		case GameView.WIN:
 			// handler.sendEmptyMessage(0);
@@ -525,7 +538,9 @@ public class WelActivity extends Activity implements OnClickListener,
 							.getString(R.string.win));
 					continue_to.setText(WelActivity.this.getResources()
 							.getString(R.string.go));
+					timeUsed.setVisibility(View.VISIBLE);
 					stateLayout.setVisibility(View.VISIBLE);
+					
 				}
 			});
 
@@ -541,6 +556,7 @@ public class WelActivity extends Activity implements OnClickListener,
 							.getString(R.string.lose));
 					continue_to.setText(WelActivity.this.getResources()
 							.getString(R.string.retry));
+					timeUsed.setVisibility(View.VISIBLE);
 					stateLayout.setVisibility(View.VISIBLE);
 				}
 			});
@@ -570,6 +586,7 @@ public class WelActivity extends Activity implements OnClickListener,
 	}
 
 	public void resumeGame() {
+		btnRefresh.invalidate();
 		stateLayout.startAnimation(slideUp);
 		stateLayout.setVisibility(View.GONE);
 		if (currentView == 0) {
@@ -651,9 +668,10 @@ public class WelActivity extends Activity implements OnClickListener,
 			adView.pause();
 		}
 		gameView.setMode(GameView.PAUSE);
+		Chartboost.onPause(this);
 		super.onPause();
 		
-		Chartboost.onPause(this);
+
 
 	}
 
@@ -667,6 +685,7 @@ public class WelActivity extends Activity implements OnClickListener,
 		if (currentView == 0) {
 			player.start();
 		}
+
 
 		Chartboost.onResume(this);
 
