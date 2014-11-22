@@ -137,7 +137,7 @@ public class BoardView extends View {
 		Path pathShapeInner = new Path();
 		// float[] intervals = new float[] { 20.0f, 20.0f };
 		// float radius = 50.0f;
-		float phase = 0;
+		float phase = iconSizeF / 16;
 		float advance = iconSizeF / 8;
 		float radiusOut = iconSizeF / 8;
 		float radiusIn = iconSizeF / 12;
@@ -183,7 +183,7 @@ public class BoardView extends View {
 		if (path != null && path.length >= 2) {
 
 			mPath = new Path();
-			Log.d("debug", "Coor: "+path[0].x +","+ path[0].y);
+//			Log.d("debug", "Coor: "+path[0].x +","+ path[0].y);
 			Point mP = indextoScreen(path[0].x, path[0].y);
 			mPath.moveTo(mP.x + iconSize / 2, mP.y + iconSize / 2);
 

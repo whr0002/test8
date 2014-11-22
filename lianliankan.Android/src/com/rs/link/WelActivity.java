@@ -24,10 +24,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.chartboost.sdk.CBLocation;
-import com.chartboost.sdk.Chartboost;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.rs.link.views.GameView;
 import com.rs.link.views.OnStateListener;
@@ -86,7 +85,10 @@ public class WelActivity extends Activity implements OnClickListener,
 	private Animation slideUp;
 
 	private AdView adView;
-
+	private String interstitialID;
+	private InterstitialAd mInterstitial;
+	private AdRequest adRequest;
+	private boolean isAdShowed= false;
 	// private Handler handler = new Handler() {
 	// @Override
 	// public void handleMessage(Message msg) {
@@ -131,11 +133,13 @@ public class WelActivity extends Activity implements OnClickListener,
 			adView.loadAd(adRequest);
 		}
 
-		// Charboost Ad set up
-		Chartboost.startWithAppId(this, getResources()
-				.getString(R.string.appId),
-				getResources().getString(R.string.appSignature));
-		Chartboost.onCreate(this);
+		interstitialID = getResources().getString(R.string.interstitialID);
+		mInterstitial = new InterstitialAd(this);
+		mInterstitial.setAdUnitId(interstitialID);
+		adRequest = new AdRequest.Builder()
+				.addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+				.addTestDevice("5E4CA696BEB736E734DD974DD296F11A").build();
+		mInterstitial.loadAd(adRequest);
 
 		btnPlay = (ImageButton) findViewById(R.id.play_btn);
 		btnHelp = (ImageButton) findViewById(R.id.help_btn);
@@ -343,7 +347,7 @@ public class WelActivity extends Activity implements OnClickListener,
 	public void doStateLayout() {
 		stateLayout.setVisibility(View.GONE);
 		if (currentState == GameView.WIN) {
-			progress.setMax(gameView.getTotalTime()-10);
+			progress.setMax(gameView.getTotalTime() - 10);
 			gameView.startNextPlay();
 		} else if (currentState == GameView.LOSE) {
 			gameView.startPlay();
@@ -378,7 +382,6 @@ public class WelActivity extends Activity implements OnClickListener,
 			soundLayout.setVisibility(View.VISIBLE);
 			imgTitle.setVisibility(View.VISIBLE);
 
-
 			btnPlay.startAnimation(scale);
 			btnHelp.startAnimation(scale);
 			btnRate.startAnimation(scale);
@@ -387,11 +390,7 @@ public class WelActivity extends Activity implements OnClickListener,
 		}
 	}
 
-	public void pauseClicked() {
-		gameView.setMode(GameView.PAUSE);
-//		if (Chartboost.hasInterstitial(CBLocation.LOCATION_LEADERBOARD)){}
-//		Chartboost.showInterstitial(CBLocation.LOCATION_LEADERBOARD);
-	}
+
 
 	public void playClicked() {
 
@@ -512,20 +511,159 @@ public class WelActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void onTimer(int leftTime) {
-		Log.i("onTimer", leftTime + "");
+		// Log.i("onTimer", leftTime + "");
 		progress.setProgress(leftTime);
 	}
 
+	
+
+	public void resumeGame() {
+		// stateLayout.startAnimation(slideUp);
+		stateLayout.setVisibility(View.GONE);
+		if (currentView == 0) {
+			player.start();
+		} else if (currentView == 1) {
+			gameView.startPlayer();
+			gameView.resumeTimer();
+		}
+	}
+
+	@Override
+	public void onRefreshChanged(int count) {
+		textRefreshNum.setText("" + gameView.getRefreshNum());
+	}
+
+	@Override
+	public void onTipChanged(int count) {
+		textTipNum.setText("" + gameView.getTipNum());
+	}
+
+	public void quit() {
+		this.finish();
+	}
+
+	private int numOfBackPressed = 0;
+
+	@Override
+	public void onBackPressed() {
+
+		// if (stateLayout.getVisibility() == View.GONE && numOfBackPressed ==
+		// 0) {
+		// // show ad
+		// if (mInterstitial != null)
+		// if (mInterstitial.isLoaded()) {
+		// mInterstitial.show();
+		// }
+		// numOfBackPressed++;
+		// return;
+		// }
+
+		Dialog dialog = new AlertDialog.Builder(this)
+				.setIcon(R.drawable.buttons_bg20)
+				.setTitle(R.string.quit)
+				.setMessage(R.string.sure_quit)
+				.setPositiveButton(R.string.alert_dialog_ok,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+								quit();
+							}
+						})
+				.setNegativeButton(R.string.alert_dialog_cancel,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+							}
+						}).create();
+		dialog.show();
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		// Get an Analytics tracker to report app starts & uncaught exceptions
+		// etc.
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
+	}
+
+	@Override
+	protected void onPause() {
+		if (adView != null) {
+			adView.pause();
+		}
+		if(!isAdShowed){
+			gameView.setMode(GameView.PAUSE);
+		}else{
+			isAdShowed = false;
+		}
+		super.onPause();
+
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		if (adView != null) {
+			adView.resume();
+		}
+		if (currentView == 0) {
+			player.start();
+		}
+
+	}
+
+	@Override
+	protected void onDestroy() {
+		// Destroy ads when the view is destroyed
+		if (adView != null) {
+			adView.destroy();
+		}
+
+		soundManager.setStreamVolume(AudioManager.STREAM_MUSIC, musicVolumn, 0);
+		gameView.setMode(GameView.QUIT);
+		super.onDestroy();
+
+	}
+	
+	private void showInterstitial(){
+		this.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (mInterstitial != null) {
+					if (mInterstitial.isLoaded()) {
+						mInterstitial.show();
+					}
+					mInterstitial.loadAd(adRequest);
+				}
+				isAdShowed = true;
+			}
+		});
+	}
+	
 	@Override
 	public void OnStateChanged(int StateMode) {
-		// Show ad here
-		if (Chartboost.hasInterstitial(CBLocation.LOCATION_LEADERBOARD)){}
-		Chartboost.showInterstitial(CBLocation.LOCATION_LEADERBOARD);
-		
-		timeUsed.setVisibility(View.GONE);
-		
-		// Show time spent in the game
-		timeUsed.setText(timeUsed.getText().toString().replace("$", String.valueOf(gameView.getTotalTime()-progress.getProgress())));
+		this.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				timeUsed.setVisibility(View.GONE);
+
+				// Log.i("debug", "time used: "
+				// + (gameView.getTotalTime() - progress.getProgress()));
+				// Show time spent in the game
+				timeUsed.setText("Time used: "
+						+ (gameView.getTotalTime() - progress.getProgress())
+						+ " seconds");
+			}
+		});
+
 		switch (StateMode) {
 		case GameView.WIN:
 			// handler.sendEmptyMessage(0);
@@ -540,7 +678,7 @@ public class WelActivity extends Activity implements OnClickListener,
 							.getString(R.string.go));
 					timeUsed.setVisibility(View.VISIBLE);
 					stateLayout.setVisibility(View.VISIBLE);
-					
+
 				}
 			});
 
@@ -583,128 +721,16 @@ public class WelActivity extends Activity implements OnClickListener,
 			break;
 		}
 		currentState = StateMode;
+
+//		if (currentState != GameView.PAUSE) {
+			showInterstitial();
+
+//		}
 	}
-
-	public void resumeGame() {
-		btnRefresh.invalidate();
-		stateLayout.startAnimation(slideUp);
-		stateLayout.setVisibility(View.GONE);
-		if (currentView == 0) {
-			player.start();
-		} else if (currentView == 1) {
-			gameView.startPlayer();
-			gameView.resumeTimer();
-		}
-	}
-
-	@Override
-	public void onRefreshChanged(int count) {
-		textRefreshNum.setText("" + gameView.getRefreshNum());
-	}
-
-	@Override
-	public void onTipChanged(int count) {
-		textTipNum.setText("" + gameView.getTipNum());
-	}
-
-	public void quit() {
-		this.finish();
-	}
-
-	private int numOfBackPressed = 0;
-	@Override
-	public void onBackPressed() {
-//		if (Chartboost.onBackPressed())
-//	        return;
-		if(stateLayout.getVisibility()==View.GONE&&numOfBackPressed == 0) {
-			// show ad
-			if (Chartboost.hasInterstitial(CBLocation.LOCATION_LEADERBOARD)){}
-			Chartboost.showInterstitial(CBLocation.LOCATION_LEADERBOARD);
-			numOfBackPressed++;
-			return;
-		}
-		
-		Dialog dialog = new AlertDialog.Builder(this)
-				.setIcon(R.drawable.buttons_bg20)
-				.setTitle(R.string.quit)
-				.setMessage(R.string.sure_quit)
-				.setPositiveButton(R.string.alert_dialog_ok,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog,
-									int whichButton) {
-								quit();
-							}
-						})
-				.setNegativeButton(R.string.alert_dialog_cancel,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog,
-									int whichButton) {
-							}
-						}).create();
-		dialog.show();
-	}
-
-	@Override
-	public void onStart() {
-		super.onStart();
-		// Get an Analytics tracker to report app starts & uncaught exceptions
-		// etc.
-		GoogleAnalytics.getInstance(this).reportActivityStart(this);
-
-		Chartboost.onStart(this);
-		Chartboost.cacheInterstitial(CBLocation.LOCATION_LEADERBOARD);
-
-	}
-
-	@Override
-	public void onStop() {
-		super.onStart();
-		GoogleAnalytics.getInstance(this).reportActivityStop(this);
-	}
-
-	@Override
-	protected void onPause() {
-		if (adView != null) {
-			adView.pause();
-		}
-		gameView.setMode(GameView.PAUSE);
-		Chartboost.onPause(this);
-		super.onPause();
-		
-
-
-	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-
-		if (adView != null) {
-			adView.resume();
-		}
-		if (currentView == 0) {
-			player.start();
-		}
-
-
-		Chartboost.onResume(this);
-
-	}
-
 	
-	@Override
-	protected void onDestroy() {
-		// Destroy ads when the view is destroyed
-		if (adView != null) {
-			adView.destroy();
-		}
-		
-		Chartboost.onDestroy(this);
-
-		soundManager.setStreamVolume(AudioManager.STREAM_MUSIC, musicVolumn, 0);
-		gameView.setMode(GameView.QUIT);
-		super.onDestroy();
-
+	public void pauseClicked() {
+		gameView.setMode(GameView.PAUSE);
+//		showInterstitial();
 	}
 
 }
