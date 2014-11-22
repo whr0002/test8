@@ -34,7 +34,7 @@ import com.rs.link.views.OnTimerListener;
 import com.rs.link.views.OnToolsChangeListener;
 
 public class WelActivity extends Activity implements OnClickListener,
-		OnTimerListener, OnStateListener, OnToolsChangeListener {
+		OnTimerListener, OnStateListener, OnToolsChangeListener{
 
 	private ImageButton btnPlay;
 	private ImageButton btnHelp;
@@ -214,14 +214,15 @@ public class WelActivity extends Activity implements OnClickListener,
 
 		SharedPreferences sp = this.getSharedPreferences("settings", 0);
 		spEditor = sp.edit();
-		hasSound = sp.getBoolean("sound", true);
+		hasSound = true;
 
 		player = MediaPlayer.create(this, R.raw.bg);
 		player.setLooping(true);// …Ë÷√—≠ª∑≤•∑≈
-		if (hasSound)
-			player.start();
-		else
-			btnSound.setBackgroundResource(R.drawable.no_sound_fixed47);
+		player.start();
+//		if (hasSound)
+//			player.start();
+//		else
+//			btnSound.setBackgroundResource(R.drawable.no_sound_fixed47);
 
 		currentView = 0;
 		currentState = -1;
@@ -480,8 +481,9 @@ public class WelActivity extends Activity implements OnClickListener,
 	public void toggleSound() {
 		// Home View
 		if (hasSound) {
+			// Disable sound
 			hasSound = false;
-			spEditor.putBoolean("sound", false);
+//			spEditor.putBoolean("sound", false);
 			if (currentView == 0)
 				player.pause();
 			else if (currentView == 1)
@@ -492,8 +494,9 @@ public class WelActivity extends Activity implements OnClickListener,
 			btnSound.setBackgroundResource(R.drawable.no_sound_fixed47);
 
 		} else {
+			// Enable sound
 			hasSound = true;
-			spEditor.putBoolean("sound", true);
+//			spEditor.putBoolean("sound", true);
 			if (currentView == 0)
 				player.start();
 			else if (currentView == 1)
@@ -506,7 +509,7 @@ public class WelActivity extends Activity implements OnClickListener,
 			btnSound.setBackgroundResource(R.drawable.sound_fixed47);
 		}
 
-		spEditor.commit();
+//		spEditor.commit();
 	}
 
 	@Override

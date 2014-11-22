@@ -205,16 +205,24 @@
 		android:visibility="gone"
         >
 
+        <RelativeLayout 
+	        android:id="@+id/state_wrapper"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="100dp"
+	        android:layout_centerHorizontal="true"
+	        android:layout_alignParentTop="true"     
+        >
+
         <TextView
             android:id="@+id/game_state"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/pause"
-            android:textSize="40sp" 
-            android:layout_marginTop="100dp"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentTop="true"
+            android:textSize="35sp" 
+			android:layout_centerInParent="true"
             android:textColor="@color/white"/>
+        </RelativeLayout>
         
         <TextView
             android:id="@+id/time_used"
@@ -222,23 +230,38 @@
             android:layout_height="wrap_content"
             android:text="@string/time"
             android:textSize="20sp" 
-            android:layout_below="@+id/game_state"
+            android:layout_below="@+id/state_wrapper"
             android:layout_marginTop="10dp"
             android:layout_centerHorizontal="true"
             android:textColor="@color/white"
             android:visibility="gone"/>
         
+         <RelativeLayout 
+	        android:id="@+id/continue_wrapper"
+	        android:layout_width="wrap_content"
+	        android:layout_height="50dp"
+            android:layout_centerHorizontal="true"
+			android:layout_alignParentBottom="true"
+			android:layout_marginBottom="100dp"
+ 
+        >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="fitXY"
+            android:src="@drawable/title_bg_fixed" />
+
         <TextView
             android:id="@+id/continue_to"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/go"
             android:textSize="15sp" 
-            android:layout_centerHorizontal="true"
-			android:layout_alignParentBottom="true"
-			android:layout_marginBottom="100dp"
-			android:textColor="@color/white"/>
-        
+			android:layout_centerInParent="true"
+			android:textColor="@color/white"
+			/>
+        </RelativeLayout>
         
         <ImageView 
             android:id="@+id/example"
