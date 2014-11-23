@@ -766,12 +766,12 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 		if (isSignedIn()) {
 			
 			if (getApiClient().isConnected()) {
-				int betterScore = seconds < record ? seconds : record;
+//				int betterScore = seconds < record ? seconds : record;
 				Games.Leaderboards
 						.submitScore(
 								getApiClient(),
 								getString(R.string.fatest_time_leaderboard),
-								betterScore * 1000);
+								seconds * 1000);
 			}
 		}else{
 			// Store the score to local if it is the best
