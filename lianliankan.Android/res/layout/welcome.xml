@@ -26,7 +26,42 @@
     			android:layout_centerHorizontal="true"
     			android:layout_below="@+id/help_btn"
     			android:layout_marginTop="20dp"
+    			android:layout_marginRight="20dp"
+    			android:layout_marginLeft="20dp"
     			android:background="@drawable/button_rate"/>
+    
+    <ImageButton android:id="@+id/leaderboard_btn"
+    			android:layout_width="wrap_content"
+    			android:layout_height="wrap_content"
+				android:layout_centerHorizontal="true" 
+				android:layout_toLeftOf="@+id/rate_btn"
+				android:layout_alignTop="@+id/rate_btn"
+    			android:background="@drawable/button_leaderboard1"/>
+    <!-- sign-in button -->
+ 
+	<ImageButton
+	 android:id="@+id/sign_in_button"
+	 android:layout_width="wrap_content"
+	 android:layout_height="wrap_content"
+	 android:layout_centerHorizontal="true" 
+	 android:layout_toRightOf="@+id/rate_btn"
+	 android:layout_alignTop="@+id/rate_btn"
+	 android:background="@drawable/button_signin"
+	 />
+	 
+	<!-- sign-out button -->
+	 
+	<ImageButton
+	 android:id="@+id/sign_out_button"
+	 android:layout_width="wrap_content"
+	 android:layout_height="wrap_content"
+	 android:text="Sign Out"
+	 android:layout_centerHorizontal="true" 
+	 android:layout_toRightOf="@+id/rate_btn"
+	 android:layout_alignTop="@+id/rate_btn"
+	 android:background="@drawable/button_signout"
+	 android:visibility="gone" />
+	
     <LinearLayout
         android:id="@+id/tool_layout"
         android:layout_width="match_parent"

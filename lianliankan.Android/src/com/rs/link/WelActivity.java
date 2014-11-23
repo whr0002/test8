@@ -32,13 +32,18 @@ import com.rs.link.views.GameView;
 import com.rs.link.views.OnStateListener;
 import com.rs.link.views.OnTimerListener;
 import com.rs.link.views.OnToolsChangeListener;
+import com.google.android.gms.games.Games;
+import com.google.example.games.basegameutils.BaseGameActivity;
 
-public class WelActivity extends Activity implements OnClickListener,
-		OnTimerListener, OnStateListener, OnToolsChangeListener{
+public class WelActivity extends BaseGameActivity implements OnClickListener,
+		OnTimerListener, OnStateListener, OnToolsChangeListener {
 
 	private ImageButton btnPlay;
 	private ImageButton btnHelp;
 	private ImageButton btnRate;
+	private ImageButton btnLeaderboard;
+	private ImageButton btnSignin;
+	private ImageButton btnSignout;
 
 	private ImageButton btnRefresh;
 	private ImageButton btnTip;
@@ -88,7 +93,8 @@ public class WelActivity extends Activity implements OnClickListener,
 	private String interstitialID;
 	private InterstitialAd mInterstitial;
 	private AdRequest adRequest;
-	private boolean isAdShowed= false;
+	private boolean isAdShowed = false;
+
 	// private Handler handler = new Handler() {
 	// @Override
 	// public void handleMessage(Message msg) {
@@ -144,6 +150,10 @@ public class WelActivity extends Activity implements OnClickListener,
 		btnPlay = (ImageButton) findViewById(R.id.play_btn);
 		btnHelp = (ImageButton) findViewById(R.id.help_btn);
 		btnRate = (ImageButton) findViewById(R.id.rate_btn);
+		btnLeaderboard = (ImageButton) findViewById(R.id.leaderboard_btn);
+		btnSignin = (ImageButton) findViewById(R.id.sign_in_button);
+		btnSignout = (ImageButton) findViewById(R.id.sign_out_button);
+		
 		btnRefresh = (ImageButton) findViewById(R.id.refresh_btn);
 		btnTip = (ImageButton) findViewById(R.id.tip_btn);
 		btnMenu = (ImageButton) findViewById(R.id.menu_btn);
@@ -206,6 +216,10 @@ public class WelActivity extends Activity implements OnClickListener,
 		bounce_in = AnimationUtils.loadAnimation(this, R.anim.bounce_in);
 		slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up);
 
+		btnLeaderboard.setOnClickListener(this);
+		btnSignin.setOnClickListener(this);
+		btnSignout.setOnClickListener(this);
+
 		imgTitle.startAnimation(scale);
 		btnPlay.startAnimation(scale);
 		btnHelp.startAnimation(scale);
@@ -219,10 +233,10 @@ public class WelActivity extends Activity implements OnClickListener,
 		player = MediaPlayer.create(this, R.raw.bg);
 		player.setLooping(true);// …Ë÷√—≠ª∑≤•∑≈
 		player.start();
-//		if (hasSound)
-//			player.start();
-//		else
-//			btnSound.setBackgroundResource(R.drawable.no_sound_fixed47);
+		// if (hasSound)
+		// player.start();
+		// else
+		// btnSound.setBackgroundResource(R.drawable.no_sound_fixed47);
 
 		currentView = 0;
 		currentState = -1;
@@ -291,6 +305,28 @@ public class WelActivity extends Activity implements OnClickListener,
 		case R.id.state_layout:
 			doStateLayout();
 			break;
+
+		case R.id.sign_in_button:
+			beginUserInitiatedSignIn();
+			break;
+
+		case R.id.sign_out_button:
+			signOut();
+			findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+			findViewById(R.id.sign_out_button).setVisibility(View.GONE);
+			break;
+
+		case R.id.leaderboard_btn:
+			if(isSignedIn()){
+			startActivityForResult(
+					Games.Leaderboards.getLeaderboardIntent(getApiClient(),
+							getString(R.string.fatest_time_leaderboard)), 2);
+			}else{
+				// User not signed in yet, let them sign in
+				beginUserInitiatedSignIn();
+			}
+			break;
+
 		}
 
 	}
@@ -369,29 +405,46 @@ public class WelActivity extends Activity implements OnClickListener,
 			btnPlay.startAnimation(scaleOut);
 			btnHelp.startAnimation(scaleOut);
 			btnRate.startAnimation(scaleOut);
+			btnLeaderboard.startAnimation(scaleOut);
+			btnSignin.startAnimation(scaleOut);
+			btnSignout.startAnimation(scaleOut);
 			imgTitle.startAnimation(scaleOut);
 
 			btnPlay.setVisibility(View.GONE);
 			btnHelp.setVisibility(View.GONE);
 			btnRate.setVisibility(View.GONE);
+			btnLeaderboard.setVisibility(View.GONE);
+			btnSignin.setVisibility(View.GONE);
+			btnSignout.setVisibility(View.GONE);
 			imgTitle.setVisibility(View.GONE);
 
 		} else {
 			btnPlay.setVisibility(View.VISIBLE);
 			btnHelp.setVisibility(View.VISIBLE);
 			btnRate.setVisibility(View.VISIBLE);
+			btnLeaderboard.setVisibility(View.VISIBLE);
+			if(!isSignedIn()){
+				btnSignin.setVisibility(View.VISIBLE);
+				btnSignin.startAnimation(scale);
+				btnSignout.setVisibility(View.GONE);
+			}else{
+				btnSignin.setVisibility(View.GONE);
+				btnSignout.setVisibility(View.VISIBLE);
+				btnSignout.startAnimation(scale);
+			}
 			soundLayout.setVisibility(View.VISIBLE);
 			imgTitle.setVisibility(View.VISIBLE);
 
 			btnPlay.startAnimation(scale);
 			btnHelp.startAnimation(scale);
 			btnRate.startAnimation(scale);
+			btnLeaderboard.startAnimation(scale);
+
+
 			soundLayout.startAnimation(bounce_in);
 			imgTitle.startAnimation(scale);
 		}
 	}
-
-
 
 	public void playClicked() {
 
@@ -483,7 +536,7 @@ public class WelActivity extends Activity implements OnClickListener,
 		if (hasSound) {
 			// Disable sound
 			hasSound = false;
-//			spEditor.putBoolean("sound", false);
+			// spEditor.putBoolean("sound", false);
 			if (currentView == 0)
 				player.pause();
 			else if (currentView == 1)
@@ -496,7 +549,7 @@ public class WelActivity extends Activity implements OnClickListener,
 		} else {
 			// Enable sound
 			hasSound = true;
-//			spEditor.putBoolean("sound", true);
+			// spEditor.putBoolean("sound", true);
 			if (currentView == 0)
 				player.start();
 			else if (currentView == 1)
@@ -509,7 +562,7 @@ public class WelActivity extends Activity implements OnClickListener,
 			btnSound.setBackgroundResource(R.drawable.sound_fixed47);
 		}
 
-//		spEditor.commit();
+		// spEditor.commit();
 	}
 
 	@Override
@@ -517,8 +570,6 @@ public class WelActivity extends Activity implements OnClickListener,
 		// Log.i("onTimer", leftTime + "");
 		progress.setProgress(leftTime);
 	}
-
-	
 
 	public void resumeGame() {
 		// stateLayout.startAnimation(slideUp);
@@ -562,7 +613,7 @@ public class WelActivity extends Activity implements OnClickListener,
 		// }
 
 		Dialog dialog = new AlertDialog.Builder(this)
-				.setIcon(R.drawable.buttons_bg20)
+				.setIcon(R.drawable.icon)
 				.setTitle(R.string.quit)
 				.setMessage(R.string.sure_quit)
 				.setPositiveButton(R.string.alert_dialog_ok,
@@ -601,9 +652,9 @@ public class WelActivity extends Activity implements OnClickListener,
 		if (adView != null) {
 			adView.pause();
 		}
-		if(!isAdShowed){
+		if (!isAdShowed) {
 			gameView.setMode(GameView.PAUSE);
-		}else{
+		} else {
 			isAdShowed = false;
 		}
 		super.onPause();
@@ -635,8 +686,8 @@ public class WelActivity extends Activity implements OnClickListener,
 		super.onDestroy();
 
 	}
-	
-	private void showInterstitial(){
+
+	private void showInterstitial() {
 		this.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -650,7 +701,7 @@ public class WelActivity extends Activity implements OnClickListener,
 			}
 		});
 	}
-	
+
 	@Override
 	public void OnStateChanged(int StateMode) {
 		this.runOnUiThread(new Runnable() {
@@ -681,6 +732,18 @@ public class WelActivity extends Activity implements OnClickListener,
 							.getString(R.string.go));
 					timeUsed.setVisibility(View.VISIBLE);
 					stateLayout.setVisibility(View.VISIBLE);
+
+					if (isSignedIn()) {
+						if (getApiClient().isConnected()) {
+							int seconds =  gameView.getTotalTime() - progress
+									.getProgress();
+							Games.Leaderboards
+									.submitScore(
+											getApiClient(),
+											getString(R.string.fatest_time_leaderboard),seconds*1000
+											);
+						}
+					}
 
 				}
 			});
@@ -725,15 +788,30 @@ public class WelActivity extends Activity implements OnClickListener,
 		}
 		currentState = StateMode;
 
-//		if (currentState != GameView.PAUSE) {
+		// if (currentState != GameView.PAUSE) {
+		if(currentView == 1)
 			showInterstitial();
 
-//		}
+		// }
 	}
-	
+
 	public void pauseClicked() {
 		gameView.setMode(GameView.PAUSE);
-//		showInterstitial();
+		// showInterstitial();
+	}
+
+	@Override
+	public void onSignInFailed() {
+		findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+		findViewById(R.id.sign_out_button).setVisibility(View.GONE);
+
+	}
+
+	@Override
+	public void onSignInSucceeded() {
+		findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+		findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
+
 	}
 
 }
