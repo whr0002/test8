@@ -28,11 +28,15 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.common.api.ResultCallback;
 import com.rs.link.views.GameView;
 import com.rs.link.views.OnStateListener;
 import com.rs.link.views.OnTimerListener;
 import com.rs.link.views.OnToolsChangeListener;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.leaderboard.LeaderboardScore;
+import com.google.android.gms.games.leaderboard.LeaderboardVariant;
+import com.google.android.gms.games.leaderboard.Leaderboards.LoadPlayerScoreResult;
 import com.google.example.games.basegameutils.BaseGameActivity;
 
 public class WelActivity extends BaseGameActivity implements OnClickListener,
@@ -54,7 +58,6 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 	private ImageView imgTitle;
 	private GameView gameView;
 	private ProgressBar progress;
-	private MyDialog dialog;
 	private ImageView clock;
 	private TextView textRefreshNum;
 	private TextView textTipNum;
@@ -76,7 +79,9 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 	private boolean hasSound;
 	private SharedPreferences sp;
 	private SharedPreferences.Editor spEditor;
-
+	private int record;
+	private long myBest;
+	
 	private int currentView;
 	private AudioManager soundManager;
 	private int musicVolumn;
@@ -93,7 +98,6 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 	private String interstitialID;
 	private InterstitialAd mInterstitial;
 	private AdRequest adRequest;
-	private boolean isAdShowed = false;
 
 	// private Handler handler = new Handler() {
 	// @Override
@@ -153,7 +157,7 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 		btnLeaderboard = (ImageButton) findViewById(R.id.leaderboard_btn);
 		btnSignin = (ImageButton) findViewById(R.id.sign_in_button);
 		btnSignout = (ImageButton) findViewById(R.id.sign_out_button);
-		
+
 		btnRefresh = (ImageButton) findViewById(R.id.refresh_btn);
 		btnTip = (ImageButton) findViewById(R.id.tip_btn);
 		btnMenu = (ImageButton) findViewById(R.id.menu_btn);
@@ -224,9 +228,15 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 		btnPlay.startAnimation(scale);
 		btnHelp.startAnimation(scale);
 		btnRate.startAnimation(scale);
+		btnLeaderboard.startAnimation(scale);
 		btnSound.startAnimation(bounce_in);
+		if (isSignedIn()) {
+			btnSignout.startAnimation(scale);
+		} else {
+			btnSignin.startAnimation(scale);
+		}
 
-		SharedPreferences sp = this.getSharedPreferences("settings", 0);
+		sp = this.getSharedPreferences("settings", 0);
 		spEditor = sp.edit();
 		hasSound = true;
 
@@ -317,11 +327,11 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 			break;
 
 		case R.id.leaderboard_btn:
-			if(isSignedIn()){
-			startActivityForResult(
-					Games.Leaderboards.getLeaderboardIntent(getApiClient(),
-							getString(R.string.fatest_time_leaderboard)), 2);
-			}else{
+			if (isSignedIn()) {
+				startActivityForResult(Games.Leaderboards.getLeaderboardIntent(
+						getApiClient(),
+						getString(R.string.fatest_time_leaderboard)), 2);
+			} else {
 				// User not signed in yet, let them sign in
 				beginUserInitiatedSignIn();
 			}
@@ -339,6 +349,7 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 				R.string.back));
 
 		toggleHomeBtns();
+		timeUsed.setVisibility(View.GONE);
 		stateLayout.setVisibility(View.VISIBLE);
 		example.setVisibility(View.VISIBLE);
 		explaination.setVisibility(View.VISIBLE);
@@ -382,6 +393,8 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 	}
 
 	public void doStateLayout() {
+		if (mInterstitial != null)
+			mInterstitial.loadAd(adRequest);
 		stateLayout.setVisibility(View.GONE);
 		if (currentState == GameView.WIN) {
 			progress.setMax(gameView.getTotalTime() - 10);
@@ -423,11 +436,11 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 			btnHelp.setVisibility(View.VISIBLE);
 			btnRate.setVisibility(View.VISIBLE);
 			btnLeaderboard.setVisibility(View.VISIBLE);
-			if(!isSignedIn()){
+			if (!isSignedIn()) {
 				btnSignin.setVisibility(View.VISIBLE);
 				btnSignin.startAnimation(scale);
 				btnSignout.setVisibility(View.GONE);
-			}else{
+			} else {
 				btnSignin.setVisibility(View.GONE);
 				btnSignout.setVisibility(View.VISIBLE);
 				btnSignout.startAnimation(scale);
@@ -439,7 +452,6 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 			btnHelp.startAnimation(scale);
 			btnRate.startAnimation(scale);
 			btnLeaderboard.startAnimation(scale);
-
 
 			soundLayout.startAnimation(bounce_in);
 			imgTitle.startAnimation(scale);
@@ -652,10 +664,17 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 		if (adView != null) {
 			adView.pause();
 		}
-		if (!isAdShowed) {
+		// if (!isAdShowed) {
+		// gameView.setMode(GameView.PAUSE);
+		// } else {
+		// isAdShowed = false;
+		// }
+		if (stateLayout.getVisibility() == View.GONE) {
 			gameView.setMode(GameView.PAUSE);
 		} else {
-			isAdShowed = false;
+			// disable sound
+			gameView.player.pause();
+			gameView.stopTimer();
 		}
 		super.onPause();
 
@@ -670,6 +689,13 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 		}
 		if (currentView == 0) {
 			player.start();
+		} else {
+			if (currentState == GameView.WIN || currentState == GameView.LOSE) {
+				// Current state is win or lose and activity is coming back from
+				// outside
+				// Resume sound
+				gameView.startPlayer();
+			}
 		}
 
 	}
@@ -695,13 +721,67 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 					if (mInterstitial.isLoaded()) {
 						mInterstitial.show();
 					}
-					mInterstitial.loadAd(adRequest);
 				}
-				isAdShowed = true;
+
 			}
 		});
 	}
 
+	
+	private int getRecord() {
+		if (isSignedIn()) {
+			// get score from leaderboard
+			if (getApiClient().isConnected()) {
+				Games.Leaderboards.loadCurrentPlayerLeaderboardScore(
+						getApiClient(),
+						getResources().getString(
+								R.string.fatest_time_leaderboard),
+						LeaderboardVariant.TIME_SPAN_ALL_TIME,
+						LeaderboardVariant.COLLECTION_PUBLIC).setResultCallback(new ResultCallback<LoadPlayerScoreResult>() {
+
+			                @Override
+			                public void onResult(LoadPlayerScoreResult arg0) {
+			                    LeaderboardScore c = arg0.getScore();
+			                    if(c != null){
+				                    long score = c.getRawScore();
+				                    myBest = score/1000;
+			                    }else{
+			                    	myBest = 9999;
+			                    }
+			                }
+			             });
+				
+				return (int)myBest;
+			}
+		} else {
+			// get score from local
+			return sp.getInt("best", 9999);
+		}
+		return 0;
+	}
+
+	public void processScore(){
+		int seconds = gameView.getTotalTime()
+				- progress.getProgress();
+		if (isSignedIn()) {
+			
+			if (getApiClient().isConnected()) {
+				int betterScore = seconds < record ? seconds : record;
+				Games.Leaderboards
+						.submitScore(
+								getApiClient(),
+								getString(R.string.fatest_time_leaderboard),
+								betterScore * 1000);
+			}
+		}else{
+			// Store the score to local if it is the best
+			if(seconds < record){
+				spEditor.putInt("best", seconds);
+				spEditor.commit();
+			}
+		}
+	}
+	
 	@Override
 	public void OnStateChanged(int StateMode) {
 		this.runOnUiThread(new Runnable() {
@@ -709,13 +789,17 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 			public void run() {
 				timeUsed.setVisibility(View.GONE);
 
+				record = getRecord();
+				int curScore = gameView.getTotalTime() - progress.getProgress();
+				record =  curScore < record ? curScore : record;
 				// Log.i("debug", "time used: "
 				// + (gameView.getTotalTime() - progress.getProgress()));
 				// Show time spent in the game
-				timeUsed.setText("Time used: "
-						+ (gameView.getTotalTime() - progress.getProgress())
-						+ " seconds");
+				timeUsed.setText("Time: "
+						+ curScore
+						+ " seconds\nBest: " + record + " seconds");
 			}
+
 		});
 
 		switch (StateMode) {
@@ -724,7 +808,7 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 			this.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-
+					showInterstitial();
 					// stuff that updates ui
 					gameState.setText(WelActivity.this.getResources()
 							.getString(R.string.win));
@@ -733,17 +817,8 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 					timeUsed.setVisibility(View.VISIBLE);
 					stateLayout.setVisibility(View.VISIBLE);
 
-					if (isSignedIn()) {
-						if (getApiClient().isConnected()) {
-							int seconds =  gameView.getTotalTime() - progress
-									.getProgress();
-							Games.Leaderboards
-									.submitScore(
-											getApiClient(),
-											getString(R.string.fatest_time_leaderboard),seconds*1000
-											);
-						}
-					}
+					processScore();
+
 
 				}
 			});
@@ -754,7 +829,7 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 			this.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-
+					showInterstitial();
 					// stuff that updates ui
 					gameState.setText(WelActivity.this.getResources()
 							.getString(R.string.lose));
@@ -789,29 +864,44 @@ public class WelActivity extends BaseGameActivity implements OnClickListener,
 		currentState = StateMode;
 
 		// if (currentState != GameView.PAUSE) {
-		if(currentView == 1)
-			showInterstitial();
+		// if(currentView == 1)
+		// showInterstitial();
 
 		// }
 	}
 
 	public void pauseClicked() {
-		gameView.setMode(GameView.PAUSE);
-		// showInterstitial();
+		// gameView.setMode(GameView.PAUSE);
+		showInterstitial();
+		if (currentView == 1) {
+			gameView.player.pause();
+			gameView.stopTimer();
+			gameState.setText(WelActivity.this.getResources().getString(
+					R.string.pause));
+			continue_to.setText(WelActivity.this.getResources().getString(
+					R.string.go));
+			stateLayout.setVisibility(View.VISIBLE);
+			currentState = GameView.PAUSE;
+			// stateLayout.startAnimation(bounce_in);
+		}
+
 	}
 
 	@Override
 	public void onSignInFailed() {
-		findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-		findViewById(R.id.sign_out_button).setVisibility(View.GONE);
-
+		if (currentView == 0) {
+			btnSignin.setVisibility(View.VISIBLE);
+			btnSignout.setVisibility(View.GONE);
+		}
 	}
 
 	@Override
 	public void onSignInSucceeded() {
-		findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-		findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
-
+		if (currentView == 0) {
+			Log.i("debug","signed in");
+			btnSignin.setVisibility(View.GONE);
+			btnSignout.setVisibility(View.VISIBLE);
+		}
 	}
 
 }

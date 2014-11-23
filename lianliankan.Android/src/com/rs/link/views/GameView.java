@@ -28,7 +28,7 @@ public class GameView extends BoardView {
 	public static final int QUIT = 5;
 
 
-	private int Help = 35;
+	private int Help = 3;
 	private int Refresh = 3;
 	/**
 	 * 第一关为100秒钟的时间
@@ -72,7 +72,7 @@ public class GameView extends BoardView {
 		SharedPreferences sp = getContext().getSharedPreferences("settings", 0);
 		hasSound = sp.getBoolean("sound", true);
 
-		Help = 30;
+		Help = 3;
 		Refresh = 3;
 		isStop = false;
 		toolsChangedListener.onRefreshChanged(Refresh);
